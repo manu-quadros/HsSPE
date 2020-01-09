@@ -25,6 +25,7 @@ module Data.Phonology.Representations ( FValue(..)
 
 import Data.Maybe (fromJust)
 import Data.Map (Map)
+import Data.Map.Merge.Strict (merge, dropMissing, zipWithMaybeMatched)
 import qualified Data.Map as Map
 import Data.List (intercalate, sortBy)
 import Data.Ord (comparing)
@@ -163,6 +164,16 @@ fmEditDistance (FMatrix fm1) (FMatrix fm2) =
     Map.size $ Map.union (difference fm1 fm2) (difference fm2 fm1)
         where
           difference = Map.differenceWithKey (\_ a' b' -> if a' /= b' then Just a' else Nothing)
+
+-- | Abstracts over two feature matrices. Useful for representing natural classes.
+fmMerge :: FMatrix -> FMatrix -> FMatrix
+fmMerge (FMatrix fm1) (FMatrix fm2) =
+  FMatrix $ fmIntersection fm1 fm2
+  where
+    fmIntersection =
+      intersectionWithDropping (\_ a' b' -> if a' == b' then Just a' else Nothing)
+    intersectionWithDropping f =
+      merge dropMissing dropMissing (zipWithMaybeMatched f)
                                              
 applyDiacritics :: [(String, FMatrix -> FMatrix)] -> Segment -> [Segment]
 applyDiacritics dias (s, fm) = map (\(dia, f) -> (s++dia, f fm)) dias
