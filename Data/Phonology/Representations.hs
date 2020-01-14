@@ -11,6 +11,7 @@ module Data.Phonology.Representations ( FValue(..)
                                       , readFMatrix
                                       , ipaSegment
                                       , ipaDiacritics
+                                      , fmEditDistance
                                       , segmentFromFeatures
                                       , includeFts
                                       , toFMatrixPairs
